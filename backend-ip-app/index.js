@@ -5,7 +5,7 @@ const app = express();
 const port = 5000;
 
 // AWS IP Ranges (example values, you should use the actual ranges from AWS)
-const allowedIps = ["52.94.0.0/16", "54.239.0.0/16"]; // Update with real AWS IP ranges
+const allowedIps = ["16.171.42.32"]; // Update with real AWS IP ranges
 
 // Middleware to check if request comes from an allowed IP range
 const isIpAllowed = (reqIp) => {
