@@ -51,7 +51,7 @@ const App = () => {
 
   const sendRequestToBackend = () => {
     // Sending the request to the frontend server, which proxies it to the backend
-    fetch("/api1/submit-ip", {
+    fetch("http://localhost:5000/api/submit-ip", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
