@@ -47,10 +47,12 @@
 const express = require("express");
 const app = express();
 
-// Middleware to get IP address from X-Forwarded-For
+// Middleware to get IP address from X-Forwarded-For or X-Real-IP
 app.use((req, res, next) => {
-  const clientIp =
-    req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+  const forwarded = req.headers["x-forwarded-for"];
+  const clientIp = forwarded
+    ? forwarded.split(",")[0].trim() // Take the first IP from X-Forwarded-For
+    : req.headers["x-real-ip"] || req.socket.remoteAddress;
 
   console.log(`Client IP (Frontend's IP): ${clientIp}`);
 
@@ -63,7 +65,7 @@ app.use((req, res, next) => {
 });
 
 // Example API route
-app.post("/api/submit", (req, res) => {
+app.post("/api/submit-ip", (req, res) => {
   res.json({ message: "Request from frontend IP processed." });
 });
 
