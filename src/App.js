@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from "react";
 
 const App = () => {
-  const [frontendIp, setFrontendIp] = useState(null);
   const [backendResponse, setBackendResponse] = useState(null);
 
   useEffect(() => {
-    // Fetch the public IP of the frontend
-    fetch("https://api.ipify.org?format=json")
-      .then((response) => response.json())
-      .then((data) => {
-        setFrontendIp(data.ip);
-        // Send the IP to the backend
-        sendIpToBackend(data.ip);
-      })
-      .catch((error) => console.error("Error fetching IP:", error));
+    // Static IP to be sent in headers
+    const staticIp = "16.171.42.32";
+
+    // Send the static IP to the backend
+    sendIpToBackend(staticIp);
   }, []);
 
   const sendIpToBackend = (ip) => {
@@ -21,8 +16,9 @@ const App = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-static-ip": ip, // Send static IP in the header
       },
-      body: JSON.stringify({ ip: ip }),
+      body: JSON.stringify({}),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -33,8 +29,7 @@ const App = () => {
 
   return (
     <div>
-      <h1>Frontend IP App</h1>
-      <p>Your IP Address: {frontendIp}</p>
+      <h1>Frontend Static IP App</h1>
       {backendResponse && (
         <p>Backend Response: {JSON.stringify(backendResponse)}</p>
       )}

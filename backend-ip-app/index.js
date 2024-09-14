@@ -4,60 +4,40 @@ const bodyParser = require("body-parser");
 const app = express();
 const port = 5000;
 
-// AWS IP Ranges (example values, you should use the actual ranges from AWS)
-const allowedIps = ["16.171.42.32"]; // Update with real AWS IP ranges
+// Allowed static IP (only this IP will be allowed)
+const allowedIp = "16.171.42.32";
 
-// Middleware to check if request comes from an allowed IP range
-const isIpAllowed = (reqIp) => {
-  const ip = reqIp.replace("::ffff:", ""); // Handle IPv4 mapped IPv6 addresses
-  return allowedIps.includes(ip);
+// Middleware to check if request comes from the allowed static IP (from headers)
+const isIpAllowed = (req) => {
+  const clientIp = req.headers["x-static-ip"]; // Get IP from custom header
+  return clientIp === allowedIp;
 };
 
-// Custom CORS middleware to accept requests only from specific IP addresses
-const corsOptions = {
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      "https://16.171.42.32", // Your AWS Frontend IP
-      "http://localhost:3000", // Localhost for testing purposes
-    ];
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true); // Allow the request
-    } else {
-      callback(new Error("Not allowed by CORS")); // Block other requests
-    }
-  },
-  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+// Custom CORS middleware to allow requests only from the allowed IP
+const corsOptionsDelegate = (req, callback) => {
+  if (isIpAllowed(req)) {
+    callback(null, { origin: true }); // Allow the request
+  } else {
+    callback(new Error("Not allowed by CORS"), { origin: false }); // Block other requests
+  }
 };
 
 // Apply CORS middleware
-app.use(cors(corsOptions));
-
-// Apply CORS middleware
-app.use(cors(corsOptions));
+app.use(cors(corsOptionsDelegate));
 app.use(bodyParser.json());
 
-// Helper to extract client IP
-const reqIp = (req) => {
-  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-  return ip ? ip.toString().replace("::ffff:", "") : null;
-};
-
-// Endpoint to receive frontend IP
+// Endpoint to handle IP submissions
 app.post("/api/submit-ip", (req, res) => {
-  const { ip } = req.body;
-  const clientIp = reqIp(req);
+  const clientIp = req.headers["x-static-ip"]; // Get static IP from headers
 
-  console.log("Frontend IP Received:", ip);
-  console.log("Client IP:", clientIp);
+  console.log("Received static IP from header:", clientIp);
 
-  if (!isIpAllowed(clientIp)) {
+  if (!isIpAllowed(req)) {
     return res.status(403).json({ message: "IP not allowed" });
   }
 
-  // Process the IP or any further logic
-
-  res.json({ message: `IP ${ip} received successfully` });
+  // Further logic processing can be added here
+  res.json({ message: `IP ${clientIp} received successfully` });
 });
 
 app.listen(port, () => {
