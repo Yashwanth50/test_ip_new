@@ -16,11 +16,7 @@ const isIpAllowed = (reqIp) => {
 // Custom CORS middleware to accept requests only from specific IP addresses
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      "https://16.171.42.32", // Your AWS Frontend IP
-      "http://localhost:3000",
-      "https://yashwanths.com", // Localhost for testing purposes
-    ];
+    const allowedOrigins = ["http://localhost:3000", "https://yashwanths.com"];
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true); // Allow the request
