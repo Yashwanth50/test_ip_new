@@ -46,8 +46,10 @@
 
 const express = require("express");
 const app = express();
-
+const cors = require("cors");
 // Middleware to get IP address from X-Forwarded-For or X-Real-IP
+
+app.use(cors());
 app.use((req, res, next) => {
   const forwarded = req.headers["x-forwarded-for"];
   const clientIp = forwarded
@@ -56,7 +58,7 @@ app.use((req, res, next) => {
 
   console.log(`Client IP (Frontend's IP): ${clientIp}`);
 
-  // Only allow requests from the frontend's IP
+  // Only allow requests from the specific IP 16.171.42.32
   if (clientIp === "16.171.42.32") {
     next(); // Allow the request
   } else {
