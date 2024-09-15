@@ -84,38 +84,55 @@ import React, { useState, useEffect } from "react";
 
 const App = () => {
   const [backendResponse, setBackendResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Automatically send the request when the component mounts
     sendRequestToBackend();
   }, []);
 
   const sendRequestToBackend = () => {
+    setLoading(true);
+    setError(null); // Clear any previous errors
+
     const backendUrl =
       process.env.NODE_ENV === "production"
-        ? "https://api.yashwanths.com/api/submit-ip" // Production backend URL
+        ? "https://wc136vdvjc.execute-api.eu-north-1.amazonaws.com/test_dev"
         : "http://localhost:5000/api/submit-ip"; // Local development URL
 
-    // Fetch request to the backend
+    // Fetch request to the backend (via API Gateway)
     fetch(backendUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({}), // You can add more data if needed
+      body: JSON.stringify({}), // You can send more data here if needed
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
-        setBackendResponse(data); // Set backend response to state
+        setBackendResponse(data); // Set the response from the backend
       })
       .catch((error) => {
-        console.error("Error sending request to backend:", error);
+        setError(`Error sending request to backend: ${error.message}`);
+      })
+      .finally(() => {
+        setLoading(false); // Stop loading
       });
   };
 
   return (
     <div>
       <h1>Frontend Static IP App</h1>
-      <button onClick={sendRequestToBackend}>Send Request to Backend</button>
+      <button onClick={sendRequestToBackend} disabled={loading}>
+        {loading ? "Sending Request..." : "Send Request to Backend"}
+      </button>
+      {error && <p style={{ color: "red" }}>{error}</p>}
       {backendResponse && (
         <p>Backend Response: {JSON.stringify(backendResponse)}</p>
       )}
