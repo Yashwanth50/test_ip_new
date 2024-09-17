@@ -96,7 +96,7 @@ const App = () => {
     setLoading(true);
     setError(null); // Clear any previous errors
 
-    const backendUrl = "https://api.yashwanths.com";
+    const backendUrl = "https://api.yashwanths.com/api/submit-ip";
     // process.env.NODE_ENV === "production"
     //   ? // ? "https://wc136vdvjc.execute-api.eu-north-1.amazonaws.com/test_dev"
     //     "https://api.yashwanths.com"
