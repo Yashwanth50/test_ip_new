@@ -74,31 +74,81 @@
 // app.listen(5000, () => {
 //   console.log("Backend listening on port 5000");
 // });
+// const express = require("express");
+// const bodyParser = require("body-parser");
+// const app = express();
+// const port = 5000;
+// const cors = require("cors");
+
+// app.set("trust proxy", true);
+
+// app.use(cors());
+// // Allowed static IP (only this IP will be allowed)
+// const allowedIp = "13.60.161.207";
+
+// // Middleware to check if the request comes from the allowed static IP (using actual client IP)
+// const checkAllowedIp = (req, res, next) => {
+//   // Get the actual client IP address (can vary depending on your environment, especially with reverse proxies)
+//   const clientIp =
+//     req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
+
+//   console.log("Received IP from request:", clientIp);
+
+//   // If the client IP matches the allowed IP, continue processing the request
+//   if (clientIp === allowedIp) {
+//     next(); // IP allowed, continue
+//   } else {
+//     // If the IP does not match, return 403 Forbidden
+//     res.status(403).json({ message: "Forbidden: IP not allowed" });
+//   }
+// };
+
+// // Apply bodyParser middleware to handle JSON requests
+// app.use(bodyParser.json());
+
+// // Apply the IP restriction middleware to the POST route
+// app.post("/api/submit-ip", checkAllowedIp, (req, res) => {
+//   const clientIp =
+//     req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
+//   console.log(`IP ${clientIp} is allowed.`);
+
+//   // Further processing logic
+//   res.json({ message: `IP ${clientIp} received successfully` });
+// });
+
+// // Start the Express server
+// app.listen(port, () => {
+//   console.log(`Backend server is running on port ${port}`);
+// });
+
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const app = express();
 const port = 5000;
-const cors = require("cors");
 
+// Let Express know it's behind a proxy (important for trusting X-Forwarded-For headers)
 app.set("trust proxy", true);
 
+// Allow cross-origin requests (CORS)
 app.use(cors());
-// Allowed static IP (only this IP will be allowed)
+
+// Allowed static IP (the only IP that is allowed to make requests)
 const allowedIp = "13.60.161.207";
 
-// Middleware to check if the request comes from the allowed static IP (using actual client IP)
+// Middleware to check if the request comes from the allowed static IP
 const checkAllowedIp = (req, res, next) => {
-  // Get the actual client IP address (can vary depending on your environment, especially with reverse proxies)
+  // Check the client IP from X-Forwarded-For (set by Nginx) or fallback to default IP detection
   const clientIp =
-    req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
+    req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.ip;
 
   console.log("Received IP from request:", clientIp);
 
   // If the client IP matches the allowed IP, continue processing the request
   if (clientIp === allowedIp) {
-    next(); // IP allowed, continue
+    next(); // IP allowed, proceed to the next middleware or route handler
   } else {
-    // If the IP does not match, return 403 Forbidden
+    // If the IP does not match, return a 403 Forbidden response
     res.status(403).json({ message: "Forbidden: IP not allowed" });
   }
 };
@@ -109,10 +159,10 @@ app.use(bodyParser.json());
 // Apply the IP restriction middleware to the POST route
 app.post("/api/submit-ip", checkAllowedIp, (req, res) => {
   const clientIp =
-    req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.ip;
+    req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.ip;
   console.log(`IP ${clientIp} is allowed.`);
 
-  // Further processing logic
+  // Further processing logic here
   res.json({ message: `IP ${clientIp} received successfully` });
 });
 
