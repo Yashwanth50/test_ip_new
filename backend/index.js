@@ -134,7 +134,7 @@ app.set("trust proxy", true);
 app.use(cors());
 
 // Allowed static IP (the only IP that is allowed to make requests)
-const allowedIp = "13.60.161.207";
+const allowedIp = ["13.60.161.207", "43.225.165.56"];
 
 // Middleware to check if the request comes from the allowed static IP
 const checkAllowedIp = (req, res, next) => {
