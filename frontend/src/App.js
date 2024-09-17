@@ -96,10 +96,11 @@ const App = () => {
     setLoading(true);
     setError(null); // Clear any previous errors
 
-    const backendUrl = "http://localhost:5000/api/submit-ip";
-    // process.env.NODE_ENV === "production"
-    //   ? "https://wc136vdvjc.execute-api.eu-north-1.amazonaws.com/test_dev"
-    //   : "http://localhost:5000/api/submit-ip"; // Local development URL
+    const backendUrl =
+      process.env.NODE_ENV === "production"
+        ? // ? "https://wc136vdvjc.execute-api.eu-north-1.amazonaws.com/test_dev"
+          "https://api.yashwanths.com"
+        : "http://localhost:5000/api/submit-ip"; // Local development URL
 
     // Fetch request to the backend (via API Gateway)
     fetch(backendUrl, {
